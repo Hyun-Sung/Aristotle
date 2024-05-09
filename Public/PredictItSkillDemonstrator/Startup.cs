@@ -36,8 +36,7 @@ namespace PredictItSkillDemonstrator
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2,
-                                                                            retryAttempt)));
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         }
 
         public IConfiguration Configuration { get; }
@@ -51,6 +50,11 @@ namespace PredictItSkillDemonstrator
             services.AddSingleton(Configuration.GetSection("ApiKeys").Get<ApiKeyConfiguration>());
             services.AddTransient<WeatherForecastController>();
             services.AddTransient<WeatherHelper>();
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.AddDebug();
+            });
 
 
             services.AddControllers();

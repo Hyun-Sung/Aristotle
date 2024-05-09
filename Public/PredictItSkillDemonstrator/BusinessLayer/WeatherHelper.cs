@@ -17,12 +17,11 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         private readonly HttpClient _httpClient;
         private readonly ILogger<WeatherHelper> _logger;
 
-        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration, IHttpClientFactory httpClientFactory)
-            //,ILogger<WeatherHelper> logger)
+        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration, IHttpClientFactory httpClientFactory, ILogger<WeatherHelper> logger)
         {
             _httpClient = httpClientFactory.CreateClient("OpenWeatherAPI");
             _apiKeyConfiguration = apiKeyConfiguration;
-            //_logger = logger;
+            _logger = logger;
 
         }
 
