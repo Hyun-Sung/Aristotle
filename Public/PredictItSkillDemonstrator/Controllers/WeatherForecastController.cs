@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web.Resource;
 using PredictItSkillDemonstrator.BusinessLayer;
+using PredictItSkillDemonstrator.Models.OpenWeatherApiModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,26 +64,45 @@ namespace PredictItSkillDemonstrator.Controllers
         }
         // create a new endpoint that uses the Helper class to get ColdForecasts
 
+        /// <summary>
+        /// from a list of forecasts for 5 days , get the cold forecasts where the temperature is below 50 degrees
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("coldforecasts")]
         public WeatherForecast[] GetColdForecasts()
         {
             _logger.Log(LogLevel.Information, "WeatherForecastController GetColdForecasts called...");
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
-            var rng = new Random();
             var forecasts = Get();
+
             return _weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+        }
+
+        /// <summary>
+        /// Get the current weather of provo
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("provoWeather")]
+        public async Task<string> GetProvoWeather()
+        {
+            double provoLon = 40.234790;
+            double provoLat = -111.658170;
+
+            CoordinatesModel coordinates = new CoordinatesModel(provoLon, provoLat);
+
+            return await GetCurrentWeather(coordinates);
 
         }
 
-
-        [HttpGet("current")]
-        public async Task<string> GetCurrentWeather()
+        private async Task<string> GetCurrentWeather(CoordinatesModel coor)
         {
-            _logger.Log(LogLevel.Information, "WeatherForecastController GetCurrentWeather called...");
+            CoordinatesModel _coordinates = coor;
+
+            _logger.Log(LogLevel.Information, "WeatherForecastController GetCurrentWeather called for " + coor.ReturnCoordinatePairAsString());
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
-            return await _weatherHelper.GetCurrentWeatherDescriptionWithCoordinates(40.234790, -111.658170);
+            return await _weatherHelper.GetCurrentWeatherDescriptionWithCoordinates(coor);
         }
     }
 }

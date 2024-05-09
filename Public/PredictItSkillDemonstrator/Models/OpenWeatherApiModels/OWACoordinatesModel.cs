@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text.Json.Serialization;
 
 namespace PredictItSkillDemonstrator.Models.OpenWeatherApiModels
 {
@@ -18,5 +19,17 @@ namespace PredictItSkillDemonstrator.Models.OpenWeatherApiModels
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
+
+        public OWACoordinatesModel() { }
+        public OWACoordinatesModel(double longitude, double latitude)
+        {
+            Longitude = longitude;
+            Latitude = latitude;
+        }
+
+        private string ReturnLonLat()
+        {
+            return $"Longitude: {Longitude}, Latitude: {Latitude}";
+        }
     }
 }

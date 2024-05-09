@@ -66,16 +66,14 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         /// <param name="lat"></param>
         /// <param name="lon"></param>
         /// <returns></returns>
-        public async Task<string> GetCurrentWeatherDescriptionWithCoordinates(double lon, double lat)
+        public async Task<string> GetCurrentWeatherDescriptionWithCoordinates(CoordinatesModel coordinates)
         {
-            double _lon = lon;
-            double _lat = lat;
             string OpenWeatherAPIKey = _apiKeyConfiguration.OpenWeatherAPIKey;
             string weatherDescription = string.Empty;
 
             string url = new UriBuilder(OpenWeatherBaseURL)
             {
-                Query = $"lat={_lat}&lon={_lon}&appid={OpenWeatherAPIKey}"
+                Query = $"lat={coordinates.Latitude}&lon={coordinates.Longitude}&appid={OpenWeatherAPIKey}"
             }.ToString();
 
             try
