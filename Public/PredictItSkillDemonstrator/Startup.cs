@@ -52,6 +52,7 @@ namespace PredictItSkillDemonstrator
             services.AddTransient<WeatherForecastController>();
             services.AddTransient<WeatherHelper>();
 
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

@@ -21,13 +21,15 @@ namespace PredictItSkillDemonstrator.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly WeatherHelper _weatherHelper;
 
         // The Web API will only accept tokens 1) for users, and 2) having the "access_as_user" scope for this API
         static readonly string[] scopeRequiredByApi = new string[] { "access_as_user" };
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, WeatherHelper weatherHelper)
         {
             _logger = logger;
+            _weatherHelper = weatherHelper;
         }
 
         [HttpGet]
@@ -67,20 +69,20 @@ namespace PredictItSkillDemonstrator.Controllers
             _logger.Log(LogLevel.Information, "WeatherForecastController GetColdForecasts called...");
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
-            var weatherHelper = new WeatherHelper();
+            var rng = new Random();
             var forecasts = Get();
-            return weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+            return _weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+
         }
 
 
         [HttpGet("current")]
-        public async Task<WeatherForecast> GetCurrentWeather()
+        public async Task<string> GetCurrentWeather()
         {
             _logger.Log(LogLevel.Information, "WeatherForecastController GetCurrentWeather called...");
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
-            var weatherHelper = new WeatherHelper();
-            return await weatherHelper.GetWeatherForecast(40.234790, -111.658170);
+            return await _weatherHelper.GetCurrentWeatherDescriptionWithCoordinates(40.234790, -111.658170);
         }
     }
 }
