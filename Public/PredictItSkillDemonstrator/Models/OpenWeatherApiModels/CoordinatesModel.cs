@@ -9,7 +9,7 @@ namespace PredictItSkillDemonstrator.Models.OpenWeatherApiModels
         public double Latitude { get; set; }
 
         public CoordinatesModel() { }
-        public CoordinatesModel(double longitude, double latitude)
+        public CoordinatesModel(double latitude, double longitude)
         {
             Longitude = longitude;
             Latitude = latitude;

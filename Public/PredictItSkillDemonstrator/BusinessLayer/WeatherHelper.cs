@@ -7,22 +7,25 @@ using System.Text.Json;
 using System;
 using PredictItSkillDemonstrator.Models.OpenWeatherApiModels;
 using Microsoft.Extensions.Logging;
+using PredictItSkillDemonstrator.HelperFunctions;
+using System.Web;
+using System.Collections.Specialized;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace PredictItSkillDemonstrator.BusinessLayer
 {
     public class WeatherHelper
     {
-        private readonly ApiKeyConfiguration _apiKeyConfiguration;
-        private readonly string OpenWeatherBaseURL = "http://api.openweathermap.org/data/2.5/weather";
         private readonly HttpClient _httpClient;
         private readonly ILogger<WeatherHelper> _logger;
+        private readonly OpenWeatherApiKeyHelperClass _openWeatherApiKeyHelperClass;
+        private string _apiKey;
 
-        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration, IHttpClientFactory httpClientFactory, ILogger<WeatherHelper> logger)
+        public WeatherHelper( IHttpClientFactory httpClientFactory, ILogger<WeatherHelper> logger, OpenWeatherApiKeyHelperClass openWeatherApiKeyHelperClass)
         {
             _httpClient = httpClientFactory.CreateClient("OpenWeatherAPI");
-            _apiKeyConfiguration = apiKeyConfiguration;
             _logger = logger;
-
+            _openWeatherApiKeyHelperClass = openWeatherApiKeyHelperClass;
         }
 
         //QUESTION #2 - Fill in this function
@@ -67,13 +70,23 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         /// <returns></returns>
         public async Task<string> GetCurrentWeatherDescriptionWithCoordinates(CoordinatesModel coordinates)
         {
-            string OpenWeatherAPIKey = _apiKeyConfiguration.OpenWeatherAPIKey;
+
+            string apiKey = _openWeatherApiKeyHelperClass.GetApiKey();
             string weatherDescription = string.Empty;
 
-            string url = new UriBuilder(OpenWeatherBaseURL)
+            //base url already in startup file. Just need to add the query parameters
+
+            //https://stackoverflow.com/questions/61842738/uri-builder-for-path-only
+            //Sahar Shokrani's answer is the one I used to build the query parameters
+
+            Dictionary<string, string> queryParameters = new Dictionary<string, string>
             {
-                Query = $"lat={coordinates.Latitude}&lon={coordinates.Longitude}&appid={OpenWeatherAPIKey}"
-            }.ToString();
+                {"lat", coordinates.Latitude.ToString()},
+                {"lon", coordinates.Longitude.ToString()},
+                {"appid", apiKey }
+            };
+            
+            string url = QueryHelpers.AddQueryString("", queryParameters);
 
             try
             {
@@ -81,25 +94,29 @@ namespace PredictItSkillDemonstrator.BusinessLayer
                 using (HttpClient client = _httpClient)
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
+                    
 
                     if (response.IsSuccessStatusCode)
                     {
                         string json = await response.Content.ReadAsStringAsync();
                         OWAPayloadModel weatherPayload = JsonSerializer.Deserialize<OWAPayloadModel>(json);
-                        weatherDescription = weatherPayload.Weather.Description;
+                        weatherDescription = weatherPayload.Weather.FirstOrDefault().Description;
 
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
                         _logger.LogError("Weather not found");
+                        throw new HttpRequestException("Weather not found");
                     }
                     else if( response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
                         _logger.LogError("Unauthorized access to weather API");
+                        throw new HttpRequestException("Unauthorized access to weather API");
                     }
                     else
                     {
-                        _logger.LogError("Error getting weather data");
+                        _logger.LogError("Error getting weather data. Error message: " + response.RequestMessage);
+                        throw new HttpRequestException("Error getting weather data");
                     }
                     
                 }

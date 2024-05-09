@@ -20,6 +20,7 @@ using Polly;
 using Polly.Extensions.Http;
 using PredictItSkillDemonstrator.Controllers;
 using PredictItSkillDemonstrator.BusinessLayer;
+using PredictItSkillDemonstrator.HelperFunctions;
 
 namespace PredictItSkillDemonstrator
 {
@@ -50,6 +51,7 @@ namespace PredictItSkillDemonstrator
             services.AddSingleton(Configuration.GetSection("ApiKeys").Get<ApiKeyConfiguration>());
             services.AddTransient<WeatherForecastController>();
             services.AddTransient<WeatherHelper>();
+            services.AddTransient<OpenWeatherApiKeyHelperClass>();
             services.AddLogging(builder =>
             {
                 builder.AddConsole();
@@ -65,7 +67,10 @@ namespace PredictItSkillDemonstrator
             
             services.AddHttpClient("OpenWeatherAPI", c =>
             {
-                c.BaseAddress = new Uri("http://api.openweathermap.org/data/2.5/weather");
+                //c.DefaultRequestHeaders.Clear();
+                //c.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                c.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/weather");
+
             }).AddPolicyHandler(GetRetryPolicy());
         }
 
@@ -78,11 +83,10 @@ namespace PredictItSkillDemonstrator
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PredictItSkillDemonstrator v1"));
             }
-
             app.UseHttpsRedirection();
-
             app.UseRouting();
 
+            //authorization and authentication
             app.UseAuthentication();
             app.UseAuthorization();
 

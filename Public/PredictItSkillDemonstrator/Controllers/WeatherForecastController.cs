@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web.Resource;
 using PredictItSkillDemonstrator.BusinessLayer;
+using PredictItSkillDemonstrator.HelperFunctions;
 using PredictItSkillDemonstrator.Models.OpenWeatherApiModels;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace PredictItSkillDemonstrator.Controllers
             // It generates a random number between -20 and 55 and uses that to set the temperature. 
             // The summary is done is a similar way. The summaries of weather are stored in an array of strings.
             // it takes the length of the array and then generates a random number between 0 and the length of the array.
-            // whatever value is returned, it finds the matching value for the index of the Summaries array. 
+            // whatever value is returned, it finds a random value using the index and the Summaries array. 
             // The value of the summary is set to the Summary property.
             // It returns the weather forecasts in an array of WeatherForecast objects.
             // generation of a list could have been done with a for loop, but it is done with a LINQ query instead which doesn't require expensive looping
@@ -60,6 +61,8 @@ namespace PredictItSkillDemonstrator.Controllers
             })
             .ToArray();
 
+            //I created a Helper function FixTemperatureFieldsHelper.CorrectDescription to fix the temperature fields in the WeatherForecast objects.
+
             //END QUESTION #1
         }
         // create a new endpoint that uses the Helper class to get ColdForecasts
@@ -68,6 +71,7 @@ namespace PredictItSkillDemonstrator.Controllers
         /// from a list of forecasts for 5 days , get the cold forecasts where the temperature is below 50 degrees
         /// </summary>
         /// <returns></returns>
+        /// [Authorize]
         [HttpGet("coldforecasts")]
         public WeatherForecast[] GetColdForecasts()
         {
@@ -76,16 +80,23 @@ namespace PredictItSkillDemonstrator.Controllers
 
             var forecasts = Get();
 
-            return _weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+            WeatherForecast[] coldTemperatures = _weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+            FixTemperatureFieldsHelper.CorrectDescription(coldTemperatures);
+            
+            return coldTemperatures;
+
         }
 
         /// <summary>
         /// Get the current weather of provo
         /// </summary>
         /// <returns></returns>
-        [HttpGet("provoWeather")]
+        [Authorize]
+        [HttpGet("provoweather")]
         public async Task<string> GetProvoWeather()
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+
             double provoLon = 40.234790;
             double provoLat = -111.658170;
 
@@ -100,7 +111,9 @@ namespace PredictItSkillDemonstrator.Controllers
             CoordinatesModel _coordinates = coor;
 
             _logger.Log(LogLevel.Information, "WeatherForecastController GetCurrentWeather called for " + coor.ReturnCoordinatePairAsString());
-            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            
+            //if we decide to allow more than just provo queries, we will need to rewrite this code a bit and also add auth.
+            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             return await _weatherHelper.GetCurrentWeatherDescriptionWithCoordinates(coor);
         }

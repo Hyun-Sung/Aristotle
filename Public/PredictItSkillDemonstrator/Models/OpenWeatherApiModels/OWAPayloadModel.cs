@@ -13,7 +13,7 @@ namespace PredictItSkillDemonstrator.Models.OpenWeatherApiModels
         public OWACoordinatesModel Coordinates { get; set; }
 
         [JsonPropertyName("weather")]
-        public OWAWeatherModel Weather { get; set; }
+        public OWAWeatherModel[] Weather { get; set; }
 
     }
 }
