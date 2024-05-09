@@ -16,7 +16,12 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         /// <returns></returns>
         public WeatherForecast[] GetColdForecasts(List<WeatherForecast> forecastsForNextMonth, int coldTempCutOffInFarenheit)
         {
-            
+            List<WeatherForecast> coldForecasts = new List<WeatherForecast>();
+
+            coldForecasts = forecastsForNextMonth.Where(f => f.TemperatureF <= coldTempCutOffInFarenheit).OrderBy(f => f.Date).ToList();
+
+            return coldForecasts.ToArray();
+
         }
         //END QUESTION #2
 

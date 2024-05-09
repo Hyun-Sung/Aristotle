@@ -35,6 +35,15 @@ namespace PredictItSkillDemonstrator.Controllers
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             //QUESTION #1 - On the line below add a comment which describes in detail what is happening in the code below
+            //  This code is making a list of 5 weather forecasts. 
+            // It generates the date based on the current date then adds the index value to it
+            // It generates a random number between -20 and 55 and uses that to set the temperature. 
+            // The summary is done is a similar way. The summaries of weather are stored in an array of strings.
+            // it takes the length of the array and then generates a random number between 0 and the length of the array.
+            // whatever value is returned, it finds the matching value for the index of the Summaries array. 
+            // The value of the summary is set to the Summary property.
+            // It returns the weather forecasts in an array of WeatherForecast objects.
+            // generation of a list could have been done with a for loop, but it is done with a LINQ query instead which doesn't require expensive looping
 
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
