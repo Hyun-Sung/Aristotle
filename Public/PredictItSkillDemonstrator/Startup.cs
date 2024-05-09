@@ -18,6 +18,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Polly;
 using Polly.Extensions.Http;
+using PredictItSkillDemonstrator.Controllers;
+using PredictItSkillDemonstrator.BusinessLayer;
 
 namespace PredictItSkillDemonstrator
 {
@@ -45,12 +47,17 @@ namespace PredictItSkillDemonstrator
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
+
             services.AddSingleton(Configuration.GetSection("ApiKeys").Get<ApiKeyConfiguration>());
+            services.AddTransient<WeatherForecastController>();
+            services.AddTransient<WeatherHelper>();
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PredictItSkillDemonstrator", Version = "v1" });
             });
+            
             services.AddHttpClient("OpenWeatherAPI", c =>
             {
                 c.BaseAddress = new Uri("http://api.openweathermap.org/data/2.5/weather");

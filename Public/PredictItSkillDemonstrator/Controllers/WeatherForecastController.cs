@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web.Resource;
+using PredictItSkillDemonstrator.BusinessLayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,9 +33,11 @@ namespace PredictItSkillDemonstrator.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            _logger.Log(LogLevel.Information, "WeatherForecastController GET called...");
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             //QUESTION #1 - On the line below add a comment which describes in detail what is happening in the code below
+
             //  This code is making a list of 5 weather forecasts. 
             // It generates the date based on the current date then adds the index value to it
             // It generates a random number between -20 and 55 and uses that to set the temperature. 
@@ -54,11 +57,30 @@ namespace PredictItSkillDemonstrator.Controllers
             })
             .ToArray();
 
-
-            _logger.Log(LogLevel.Information, "WeatherForecastController GET called...");
-
             //END QUESTION #1
+        }
+        // create a new endpoint that uses the Helper class to get ColdForecasts
 
+        [HttpGet("coldforecasts")]
+        public WeatherForecast[] GetColdForecasts()
+        {
+            _logger.Log(LogLevel.Information, "WeatherForecastController GetColdForecasts called...");
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+
+            var weatherHelper = new WeatherHelper();
+            var forecasts = Get();
+            return weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+        }
+
+
+        [HttpGet("current")]
+        public async Task<WeatherForecast> GetCurrentWeather()
+        {
+            _logger.Log(LogLevel.Information, "WeatherForecastController GetCurrentWeather called...");
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+
+            var weatherHelper = new WeatherHelper();
+            return await weatherHelper.GetWeatherForecast(40.234790, -111.658170);
         }
     }
 }

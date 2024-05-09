@@ -1,12 +1,12 @@
 ﻿using PredictItSkillDemonstrator.Configurations;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System;
 using PredictItSkillDemonstrator.Models.OpenWeatherApiModels;
+using Microsoft.Extensions.Logging;
 
 namespace PredictItSkillDemonstrator.BusinessLayer
 {
@@ -15,10 +15,14 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         private readonly ApiKeyConfiguration _apiKeyConfiguration;
         private readonly string OpenWeatherBaseURL = "http://api.openweathermap.org/data/2.5/weather";
         private readonly HttpClient _httpClient;
-        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration, IHttpClientFactory httpClientFactory)
+        private readonly ILogger<WeatherHelper> _logger;
+
+        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration, IHttpClientFactory httpClientFactory,
+            ILogger<WeatherHelper> logger)
         {
             _httpClient = httpClientFactory.CreateClient("OpenWeatherAPI");
             _apiKeyConfiguration = apiKeyConfiguration;
+            _logger = logger;
 
         }
 
@@ -59,11 +63,13 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         /// <summary>
         /// Calls the OpenWeather API and returns the weather description for lat 40.234790 long -111.658170
         /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
         /// <returns></returns>
-        public async Task<string> GetCurrentWeatherDescription(double lat, double lon)
+        public async Task<string> GetCurrentWeatherDescriptionWithCoordinates(double lon, double lat)
         {
-            double _lat = lat;
             double _lon = lon;
+            double _lat = lat;
             string OpenWeatherAPIKey = _apiKeyConfiguration.OpenWeatherAPIKey;
             string weatherDescription = string.Empty;
 
@@ -72,20 +78,40 @@ namespace PredictItSkillDemonstrator.BusinessLayer
                 Query = $"lat={_lat}&lon={_lon}&appid={OpenWeatherAPIKey}"
             }.ToString();
 
-            //_httpClient has been configured with a base url and a retry policy that has exponential backoff implemented
-            using (HttpClient client = _httpClient)
+            try
             {
-                HttpResponseMessage response = await client.GetAsync(url);
-
-                if (response.IsSuccessStatusCode)
+                //_httpClient has been configured with a base url and a retry policy that has exponential backoff implemented
+                using (HttpClient client = _httpClient)
                 {
-                    string json = await response.Content.ReadAsStringAsync();
-                    OWAPayloadModel weatherPayload = JsonSerializer.Deserialize<OWAPayloadModel>(json);
-                    weatherDescription = weatherPayload.Weather.Description;
+                    HttpResponseMessage response = await client.GetAsync(url);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = await response.Content.ReadAsStringAsync();
+                        OWAPayloadModel weatherPayload = JsonSerializer.Deserialize<OWAPayloadModel>(json);
+                        weatherDescription = weatherPayload.Weather.Description;
+
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        _logger.LogError("Weather not found");
+                    }
+                    else if( response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        _logger.LogError("Unauthorized access to weather API");
+                    }
+                    else
+                    {
+                        _logger.LogError("Error getting weather data");
+                    }
                     
                 }
             }
-
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error getting weather data");
+            }
+            
             return weatherDescription;
         }
 
