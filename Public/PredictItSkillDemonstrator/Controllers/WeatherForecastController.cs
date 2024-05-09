@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PredictItSkillDemonstrator.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
@@ -37,7 +37,7 @@ namespace PredictItSkillDemonstrator.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
-            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             _logger.Log(LogLevel.Information, "WeatherForecastController GET called...");
 
@@ -72,12 +72,12 @@ namespace PredictItSkillDemonstrator.Controllers
         /// from a list of forecasts for 5 days , get the cold forecasts where the temperature is below 50 degrees
         /// </summary>
         /// <returns></returns>
-        /// [Authorize]
+
         [HttpGet("coldforecasts")]
         public WeatherForecast[] GetColdForecasts()
         {
             _logger.Log(LogLevel.Information, "WeatherForecastController GetColdForecasts called...");
-            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             var forecasts = Get();
 
@@ -96,7 +96,7 @@ namespace PredictItSkillDemonstrator.Controllers
         [HttpGet("provoweather")]
         public async Task<string> GetProvoWeather()
         {
-            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             double provoLon = 40.234790;
             double provoLat = -111.658170;
