@@ -54,6 +54,9 @@ namespace PredictItSkillDemonstrator.Controllers
             })
             .ToArray();
 
+
+            _logger.Log(LogLevel.Information, "WeatherForecastController GET called...");
+
             //END QUESTION #1
 
         }

@@ -10,9 +10,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Http.Polly;
+using PredictItSkillDemonstrator.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace PredictItSkillDemonstrator
@@ -24,6 +27,16 @@ namespace PredictItSkillDemonstrator
             Configuration = configuration;
         }
 
+        //implement retry policy with exp backoff
+        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2,
+                                                                            retryAttempt)));
+        }
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -31,12 +44,16 @@ namespace PredictItSkillDemonstrator
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
-
+            services.AddSingleton(Configuration.GetSection("ApiKeys").Get<ApiKeyConfiguration>());
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PredictItSkillDemonstrator", Version = "v1" });
             });
+            services.AddHttpClient("OpenWeatherAPI", c =>
+            {
+                c.BaseAddress = new Uri("http://api.openweathermap.org/data/2.5/weather");
+            }).AddPolicyHandler(GetRetryPolicy());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
