@@ -1,0 +1,16 @@
+﻿********BEGIN INSTRUCTIONS********
+
+This is the PredictIt take home interview skill demonstration project. 
+
+Inside of this project are four questions which are based on our everyday work here at PredictIt. They are formatted as comments and all have the syntax of “QUESTION #...”
+
+Work through, adding your comments and code to this project. Feel free to use whatever tools or techniques you would use in a work environment (libraries, websites, frameworks, etc ) with the exception of other individuals.
+
+Before starting please mark the time below, when you finish also mark the time. When you are done please zip up and send this project to whomever you are interviewing with.
+
+We appreciate your efforts and look forward to working with you.
+
+Start Time:
+End Time:
+
+********END INSTRUCTIONS********
