@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PredictItSkillDemonstrator.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
@@ -37,8 +37,9 @@ namespace PredictItSkillDemonstrator.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+
             _logger.Log(LogLevel.Information, "WeatherForecastController GET called...");
-            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             //QUESTION #1 - On the line below add a comment which describes in detail what is happening in the code below
 
@@ -76,7 +77,7 @@ namespace PredictItSkillDemonstrator.Controllers
         public WeatherForecast[] GetColdForecasts()
         {
             _logger.Log(LogLevel.Information, "WeatherForecastController GetColdForecasts called...");
-            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             var forecasts = Get();
 
@@ -91,11 +92,11 @@ namespace PredictItSkillDemonstrator.Controllers
         /// Get the current weather of provo
         /// </summary>
         /// <returns></returns>
-        [Authorize]
+        
         [HttpGet("provoweather")]
         public async Task<string> GetProvoWeather()
         {
-            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             double provoLon = 40.234790;
             double provoLat = -111.658170;
@@ -111,9 +112,6 @@ namespace PredictItSkillDemonstrator.Controllers
             CoordinatesModel _coordinates = coor;
 
             _logger.Log(LogLevel.Information, "WeatherForecastController GetCurrentWeather called for " + coor.ReturnCoordinatePairAsString());
-            
-            //if we decide to allow more than just provo queries, we will need to rewrite this code a bit and also add auth.
-            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
             return await _weatherHelper.GetCurrentWeatherDescriptionWithCoordinates(coor);
         }

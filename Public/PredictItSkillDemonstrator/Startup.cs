@@ -86,7 +86,6 @@ namespace PredictItSkillDemonstrator
             app.UseHttpsRedirection();
             app.UseRouting();
 
-            //authorization and authentication
             app.UseAuthentication();
             app.UseAuthorization();
 
