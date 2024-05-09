@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System;
+using PredictItSkillDemonstrator.Models.OpenWeatherApiModels;
 
 namespace PredictItSkillDemonstrator.BusinessLayer
 {
@@ -13,9 +14,12 @@ namespace PredictItSkillDemonstrator.BusinessLayer
     {
         private readonly ApiKeyConfiguration _apiKeyConfiguration;
         private readonly string OpenWeatherBaseURL = "http://api.openweathermap.org/data/2.5/weather";
-        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration)
+        private readonly HttpClient _httpClient;
+        public WeatherHelper(ApiKeyConfiguration apiKeyConfiguration, IHttpClientFactory httpClientFactory)
         {
-           _apiKeyConfiguration = apiKeyConfiguration;
+            _httpClient = httpClientFactory.CreateClient("OpenWeatherAPI");
+            _apiKeyConfiguration = apiKeyConfiguration;
+
         }
 
         //QUESTION #2 - Fill in this function
@@ -68,22 +72,23 @@ namespace PredictItSkillDemonstrator.BusinessLayer
                 Query = $"lat={_lat}&lon={_lon}&appid={OpenWeatherAPIKey}"
             }.ToString();
 
-            using (HttpClient client = new HttpClient())
+            //_httpClient has been configured with a base url and a retry policy that has exponential backoff implemented
+            using (HttpClient client = _httpClient)
             {
                 HttpResponseMessage response = await client.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string json = await response.Content.ReadAsStringAsync();
-                    dynamic weatherData = JsonSerializer.Deserialize<>
-
-                    weatherDescription = weatherData.weather[0].description;
+                    OWAPayloadModel weatherPayload = JsonSerializer.Deserialize<OWAPayloadModel>(json);
+                    weatherDescription = weatherPayload.Weather.Description;
+                    
                 }
             }
 
             return weatherDescription;
         }
-        
+
         //END QUESTION #4
     }
 }
