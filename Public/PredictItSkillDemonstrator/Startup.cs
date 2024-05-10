@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,15 +10,14 @@ using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using PredictItSkillDemonstrator.Configurations;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Polly;
 using Polly.Extensions.Http;
 using PredictItSkillDemonstrator.Controllers;
 using PredictItSkillDemonstrator.BusinessLayer;
 using PredictItSkillDemonstrator.HelperFunctions;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace PredictItSkillDemonstrator
 {
@@ -45,6 +42,8 @@ namespace PredictItSkillDemonstrator
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+           
+            //https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles?tabs=aspnetcore
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
@@ -82,11 +81,29 @@ namespace PredictItSkillDemonstrator
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PredictItSkillDemonstrator v1"));
+
+                // Custom authentication found from
+                //https://stackoverflow.com/questions/53234135/programmatically-add-allowanonymous-attribute-to-all-my-controller-methods/53242694#53242694
+                //user4864425
+                app.Use(async (context, next) =>
+                {
+                    // Set claims for the test user.
+                    var claims = new[] { new Claim("role", "Admin"), new Claim("scp", "access_as_user") };
+                    var id = new ClaimsIdentity(claims, "DebugAuthorizationMiddleware", "name", "role");
+                    // Add the test user as Identity.
+                    context.User.AddIdentity(id);
+                    // User is now authenticated.
+                    await next.Invoke();
+                });
             }
+            else
+            {
+                // use configured authentication
+                app.UseAuthentication();
+            }
+
             app.UseHttpsRedirection();
             app.UseRouting();
-
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
