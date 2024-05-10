@@ -124,11 +124,12 @@ namespace PredictItSkillDemonstrator.BusinessLayer
                         weatherDescription = weatherPayload.Weather.FirstOrDefault().Description;
 
                     }
-                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    //this case is handled by the httpclient configuration in the startup file. 
+                    /*else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
                         _logger.LogError("Weather not found");
                         throw new HttpRequestException("Weather not found");
-                    }
+                    }*/
                     else if( response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
                         _logger.LogError("Unauthorized access to weather API");
