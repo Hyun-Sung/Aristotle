@@ -78,14 +78,13 @@ namespace PredictItSkillDemonstrator.Controllers
         {
             _logger.Log(LogLevel.Information, "WeatherForecastController GetColdForecasts called...");
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-
+            
             var forecasts = Get();
 
-            WeatherForecast[] coldTemperatures = _weatherHelper.GetColdForecasts(forecasts.ToList(), 50);
+            WeatherForecast[] coldTemperatures = _weatherHelper.GetColdForecasts(forecasts.ToList());
             FixTemperatureFieldsHelper.CorrectDescription(coldTemperatures);
             
             return coldTemperatures;
-
         }
 
         /// <summary>

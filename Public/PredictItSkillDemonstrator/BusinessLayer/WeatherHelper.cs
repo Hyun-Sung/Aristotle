@@ -37,12 +37,16 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         /// <returns></returns>
         public WeatherForecast[] GetColdForecasts(List<WeatherForecast> forecastsForNextMonth, int coldTempCutOffInFarenheit)
         {
-            List<WeatherForecast> coldForecasts = new List<WeatherForecast>();
+            //because it's part of the question, I didn't modify the name of the method, but if I was doing a code review,
+            //I would mention that I would prefer to call this method "GetNextMonthColdForecasts" to reduce ambiguity.
+            //this suggests getting ColdForecasts but takes a very specific input: forecasts for NEXT month
 
-            coldForecasts = forecastsForNextMonth.Where(f => f.TemperatureF <= coldTempCutOffInFarenheit).OrderBy(f => f.Date).ToList();
+            List<WeatherForecast> _forecastsForNextMonth = forecastsForNextMonth;
+            int _tempCutoff = coldTempCutOffInFarenheit;
 
-            return coldForecasts.ToArray();
+            WeatherForecast[] weatherForecasts = ReturnTempBasedForecasts(forecastsForNextMonth, _tempCutoff);
 
+            return weatherForecasts;
         }
         //END QUESTION #2
 
@@ -53,9 +57,26 @@ namespace PredictItSkillDemonstrator.BusinessLayer
         /// </summary>
         /// <param name="forecastsForNextMonth"></param>
         /// <returns></returns>
-        public WeatherForecast[] GetColdForecasts(List<WeatherForecast> forecastsForNextMonth)
+        public WeatherForecast[] GetColdForecasts(List<WeatherForecast> foreCasts)
         {
-            return GetColdForecasts(forecastsForNextMonth, 50);
+            int coldCutOffTemp = 50;
+            return GetColdForecasts(foreCasts, coldCutOffTemp);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="forecasts"></param>
+        /// <param name="tempCutOffInFarenheit"></param>
+        /// <returns></returns>
+        public  WeatherForecast[] ReturnTempBasedForecasts(List<WeatherForecast> forecasts, int tempCutOffInFarenheit)
+        {
+            List<WeatherForecast> coldForecasts = new List<WeatherForecast>();
+
+            coldForecasts = forecasts.Where(f => f.TemperatureF <= tempCutOffInFarenheit).OrderBy(f => f.Date).ToList();
+
+            return coldForecasts.ToArray();
+
         }
 
         //END QUESTION #3
