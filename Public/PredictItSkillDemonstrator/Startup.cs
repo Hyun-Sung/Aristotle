@@ -105,13 +105,13 @@ namespace PredictItSkillDemonstrator
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PredictItSkillDemonstrator v1"));
 
-                // Custom authentication found from
+                // Custom authentication blueprint taken found from
                 //https://stackoverflow.com/questions/53234135/programmatically-add-allowanonymous-attribute-to-all-my-controller-methods/53242694#53242694
                 //user4864425
                 app.Use(async (context, next) =>
                 {
                     // Set claims for the test user.
-                    var claims = new[] { new Claim("role", "Admin"), new Claim("scp", "access_as_user") };
+                    var claims = new[] { new Claim("scp", "access_as_user") };
                     var id = new ClaimsIdentity(claims, "DebugAuthorizationMiddleware", "name", "role");
                     // Add the test user as Identity.
                     context.User.AddIdentity(id);
