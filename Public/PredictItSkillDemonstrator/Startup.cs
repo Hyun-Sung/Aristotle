@@ -18,6 +18,7 @@ using PredictItSkillDemonstrator.BusinessLayer;
 using PredictItSkillDemonstrator.HelperFunctions;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Net.Security;
 
 namespace PredictItSkillDemonstrator
 {
@@ -70,7 +71,29 @@ namespace PredictItSkillDemonstrator
                 //c.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 c.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/weather");
 
-            }).AddPolicyHandler(GetRetryPolicy());
+            }).ConfigurePrimaryHttpMessageHandler((c) =>
+            new HttpClientHandler()
+            {
+                //this allows chrome based browers to run the service despite certificate errors.
+                //the idea came from https://stackoverflow.com/questions/2675133/c-sharp-ignore-certificate-errors, user: Ogglas
+                //the difference is here I am adding it to the startup file while configuring the client for "OpenWeatherAPI"
+
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                {
+                    if (sslPolicyErrors == SslPolicyErrors.None)
+                    {
+                        return true;   //Is valid
+                    }
+
+                    // this hash string can be found by clicking on the certificate in chrome -> details -> thumbprint 
+                    // then running cert.GetCertHashString().ToLower() on the value
+                    if (cert.GetCertHashString() == "99E92D8447AEF30483B1D7527812C9B7B3A915A7")
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+        }).AddPolicyHandler(GetRetryPolicy());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
